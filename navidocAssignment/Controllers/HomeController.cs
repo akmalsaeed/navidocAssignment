@@ -13,9 +13,16 @@ namespace navidocAssignment.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpPost]
+        public JsonResult readTxtFile(IFormFile file)
+        {
+            return Json(new { foo = "bar", baz = "Blech" });
         }
 
         public IActionResult Privacy()

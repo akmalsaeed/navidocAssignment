@@ -3,7 +3,11 @@
 }
 
 <div class="text-center">
-    <input type="file" accept=".txt">Upload file.
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" id="txtFile" accept=".txt">
+        <input type="button" class="btn btn-primary" id="button_upload" value="Upload File">
+    </form>
     <div>
         <canvas id="barChar"></canvas>
     </div>
@@ -13,6 +17,48 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+
+        $(document).on('click', '#button_upload', function () {
+            if (window.FormData !== undefined) {
+                var fileUpload = $("#txtFile").get(0);
+                if ($("#txtFile").get(0).files.length == 0) {
+                    $('#alert_error span').text("Please upload the file");
+                    $('#alert_error').show();
+                    return;
+                }
+                
+                var files = fileUpload.files;
+                var fileData = new FormData();
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+                $.ajax({
+                    url: '/Home/readTxtFile',
+                    type: "POST",
+                    contentType: false,
+                    processData: false,
+                    data: fileData,
+                    success: function (result) {
+                        if (result != null){
+                            $('#alert_error span').text("Text uploaded successfully");
+                            $('#alert_error').show();
+                        }
+                        else{
+                            $('#alert_error span').text("Something went wrong. Please try again");
+                            $('#alert_error').show();
+                        }
+                    },
+                    error: function (err) {
+                        $('#alert_error span').text("Something went wrong. Please try again");
+                        $('#alert_error').show();
+                    }
+                });
+            } else {
+                $('#alert_error span').text("FormData is not supported in the browser.");
+                $('#alert_error').show();
+            }
+        });
+
         const ctx = document.getElementById('barChar');
 
         new Chart(ctx, {
