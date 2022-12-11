@@ -36,9 +36,7 @@
                     data: formData,
                     success: function (result) {
                         if (result != null){
-                            //$('#alert_error span').text("Text uploaded successfully");
                             $('#alert_error').hide();
-                            console.log(result.labels);
                             if(result.labels){
                                 barChart.data.labels = result.labels;
                             }
@@ -49,7 +47,7 @@
                                 barChart.data.datasets[0].backgroundColor = result.colors;
                             }
                             barChart.update();
-                            setInterval(randomizeData, 1000);
+                            setInterval(randomizeData, 5000);
                         }
                         else{
                             $('#alert_error span').text("Something went wrong. Please try again");
