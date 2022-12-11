@@ -20,28 +20,36 @@
 
         $(document).on('click', '#button_upload', function () {
             if (window.FormData !== undefined) {
-                var fileUpload = $("#txtFile").get(0);
-                if ($("#txtFile").get(0).files.length == 0) {
-                    $('#alert_error span').text("Please upload the file");
-                    $('#alert_error').show();
-                    return;
-                }
-                
-                var files = fileUpload.files;
-                var fileData = new FormData();
-                for (var i = 0; i < files.length; i++) {
-                    fileData.append(files[i].name, files[i]);
-                }
+                var formData = new FormData();
+                var totalFiles = document.getElementById("txtFile").files.length;
+
+                for (var i = 0; i < totalFiles; i++) 
+                    var file = document.getElementById("txtFile").files[i];
+
+                    formData.append("FileUpload", file);
                 $.ajax({
                     url: '/Home/readTxtFile',
                     type: "POST",
                     contentType: false,
                     processData: false,
-                    data: fileData,
+                    dataType:'json',
+                    data: formData,
                     success: function (result) {
                         if (result != null){
-                            $('#alert_error span').text("Text uploaded successfully");
-                            $('#alert_error').show();
+                            //$('#alert_error span').text("Text uploaded successfully");
+                            $('#alert_error').hide();
+                            console.log(result.labels);
+                            if(result.labels){
+                                barChart.data.labels = result.labels;
+                            }
+                            if (result.data) {
+                                barChart.data.datasets[0].data = result.data;
+                            }
+                            if(result.colors){
+                                barChart.data.datasets[0].backgroundColor = result.colors;
+                            }
+                            barChart.update();
+                            setInterval(randomizeData, 1000);
                         }
                         else{
                             $('#alert_error span').text("Something went wrong. Please try again");
@@ -49,8 +57,12 @@
                         }
                     },
                     error: function (err) {
-                        $('#alert_error span').text("Something went wrong. Please try again");
-                        $('#alert_error').show();
+                        if (err.responseJSON.message)
+                        $('#alert_error span').text(err.responseJSON.message);
+                        $('#alert_error').show();   
+                    },
+                    complete:function(){
+                        $('#txtFile').val("");
                     }
                 });
             } else {
@@ -59,17 +71,23 @@
             }
         });
 
+        function randomizeData(){
+            for(i = 0; i < barChart.data.datasets[0].data.length; i++){
+                barChart.data.datasets[0].data[i] = parseInt(Math.random() * 100);
+            }
+            barChart.update();
+        }
+
         const ctx = document.getElementById('barChar');
 
-        new Chart(ctx, {
+        var barChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                labels: [],
                 datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
+                    data: [],
                     borderWidth: 1,
-                    backgroundColor: ["red", "blue", "green", "blue", "red", "blue"],
+                    backgroundColor: [],
                 }]
             },
             options: {

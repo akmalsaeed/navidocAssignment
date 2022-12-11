@@ -33,19 +33,34 @@ namespace navidocAssignment.Controllers
             System.IO.StreamReader fileReader = new System.IO.StreamReader(stream);
             BarchartDataModel barcharDataModel = new BarchartDataModel();
             string line;
-            while ((line = fileReader.ReadLine()) != null)
+            try
             {
-                string[] strArray = line.Split(':');
-                barcharDataModel.labels.Add(strArray[0]);
-                barcharDataModel.colors.Add(strArray[1]);
-                barcharDataModel.data.Add(Int32.Parse(strArray[2]));
-            }
-            var options = new JsonSerializerOptions
-            {
-                IncludeFields = true,
-            };
+                if (fileReader.Peek() == -1)
+                {
+                    throw new Exception("Empty file uploaded");
+                }
+                while ((line = fileReader.ReadLine()) != null)
+                {
+                    string[] strArray = line.Split(':');
+                    barcharDataModel.labels.Add(strArray[0]);
+                    barcharDataModel.colors.Add(strArray[1]);
+                    barcharDataModel.data.Add(Int32.Parse(strArray[2]));
+                }
 
-            return Json(barcharDataModel,options);
+                
+                var options = new JsonSerializerOptions
+                {
+                    IncludeFields = true,
+                };
+
+                return Json(barcharDataModel,options);
+
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 400;
+                return new JsonResult(new { message = ex.Message });
+            }
         }
 
 
